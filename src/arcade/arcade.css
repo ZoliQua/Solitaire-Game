@@ -1,0 +1,743 @@
+/* Zoltan's Arcade — shared design system.
+   Single source of the colour tokens and the `arc-*` components used by the
+   portal and by every game (standalone or embedded). Vendored into each game
+   as src/arcade/arcade.css; import it ONCE per page (main.tsx / portal). */
+
+:root {
+  color-scheme: dark;
+  /* Surfaces */
+  --bg: #0f1016;
+  --bg-elev: #14151e;
+  --panel-bg: #181a23;
+  --panel-bg-soft: #1c1e29;
+  --panel-border: #2a2d3a;
+  --panel-border-strong: #353849;
+  --grid-line: #2a2d3e;
+  --grid-empty: #1c1e2c;
+  --overlay-bg: rgba(10, 11, 18, 0.78);
+
+  /* Text */
+  --text: #d8dae3;
+  --text-dim: #8b8fa1;
+  --text-mute: #5d6175;
+  --text-strong: #f5f6fa;
+
+  /* Brand / accents */
+  --accent: #6b8cff;
+  --accent-strong: #8aa2ff;
+  --accent-soft: rgba(107, 140, 255, 0.14);
+  --accent-ring: rgba(107, 140, 255, 0.45);
+  --ok: #42d392;
+  --warn: #f4b860;
+  --danger: #ef4c55;
+
+  /* Per-game accents */
+  --game-tetris: #6b8cff;
+  --game-snake: #42d392;
+  --game-2048: #f4b860;
+  --game-pacman: #ffd23f;
+  --game-gomoku: #c9a46a;
+  --game-tictactoe: #4fd1c5;
+  --game-breakout: #ff7a59;
+  --game-invaders: #b37dff;
+  --game-connect4: #ff5c8a;
+  --game-nutsort: #9fd356;
+  --game-holdem: #38bdf8;
+  --game-minesweeper: #9aa4b8;
+  --game-solitaire: #2fa36b;
+  --game-ulti: #c8553d;
+
+  /* Tetromino palette (matches Tetris logic/constants.ts) */
+  --tetro-I: #31c7ef;
+  --tetro-O: #f7d308;
+  --tetro-T: #ad4d9c;
+  --tetro-S: #42b642;
+  --tetro-Z: #ef2029;
+  --tetro-J: #5a65ad;
+  --tetro-L: #ef7921;
+
+  /* Shape */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
+
+  /* Type */
+  --font-sans: ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Consolas, monospace;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f5f6fa;
+  --bg-elev: #ffffff;
+  --panel-bg: #ffffff;
+  --panel-bg-soft: #f1f2f8;
+  --panel-border: #e2e4ee;
+  --panel-border-strong: #ccd0de;
+  --grid-line: #e2e4ee;
+  --grid-empty: #f8f9fc;
+  --overlay-bg: rgba(255, 255, 255, 0.84);
+
+  --text: #2a2d3a;
+  --text-dim: #6b6f80;
+  --text-mute: #9aa0b3;
+  --text-strong: #0f1016;
+
+  --accent-soft: rgba(107, 140, 255, 0.1);
+  --game-pacman: #d9a400;
+  --game-gomoku: #a47b3c;
+  --game-tictactoe: #1f9e93;
+  --game-breakout: #e0562f;
+  --game-invaders: #8a4fd8;
+  --game-connect4: #d6336c;
+  --game-nutsort: #5f9e2f;
+  --game-holdem: #0284c7;
+  --game-minesweeper: #5b6577;
+  --game-solitaire: #1f7a4f;
+  --game-ulti: #9c3b27;
+  --shadow-sm: 0 2px 8px rgba(15, 16, 22, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 16, 22, 0.1);
+  --shadow-lg: 0 18px 48px rgba(15, 16, 22, 0.14);
+}
+
+/* ─── Base ──────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Buttons & kbd ─────────────────────────────────────────── */
+.arc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--panel-border-strong);
+  background: var(--panel-bg-soft);
+  color: var(--text-strong);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 120ms ease, border-color 120ms ease, transform 80ms ease;
+}
+.arc-btn:hover {
+  border-color: var(--game-color, var(--accent));
+}
+.arc-btn:active {
+  transform: translateY(1px);
+}
+.arc-btn:focus-visible,
+.arc-icon-btn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+.arc-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.arc-btn--primary {
+  background: var(--game-color, var(--accent));
+  border-color: transparent;
+  color: #0f1016;
+}
+.arc-btn--primary:hover {
+  filter: brightness(1.08);
+  border-color: transparent;
+}
+.arc-btn--ghost {
+  background: transparent;
+  border-color: var(--panel-border);
+  color: var(--text);
+  font-weight: 500;
+}
+.arc-btn--danger {
+  color: var(--danger);
+  border-color: color-mix(in oklab, var(--danger) 40%, transparent);
+}
+.arc-icon-btn {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+}
+.arc-kbd {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--panel-bg-soft);
+  border: 1px solid var(--panel-border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--text);
+}
+.arc-btn--primary .arc-kbd {
+  background: rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 0, 0, 0.18);
+  color: inherit;
+}
+
+/* ─── Panels ────────────────────────────────────────────────── */
+.arc-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+}
+.arc-panel__title {
+  margin: 0 0 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+
+/* ─── Stat strip ────────────────────────────────────────────── */
+.arc-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+.arc-stats__grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(78px, 1fr);
+  gap: 8px;
+  margin: 0;
+  flex: 1;
+}
+.arc-stat {
+  background: var(--panel-bg-soft);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  min-width: 0;
+}
+.arc-stat dt {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+.arc-stat dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.arc-stat--hl {
+  border-color: color-mix(in oklab, var(--game-color, var(--accent)) 55%, transparent);
+}
+.arc-stat--hl dd {
+  color: var(--game-color, var(--accent));
+}
+@media (max-width: 560px) {
+  .arc-stats__grid {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.arc-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg-soft);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.arc-status__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-mute);
+}
+.arc-status--running .arc-status__dot {
+  background: var(--ok);
+  box-shadow: 0 0 8px var(--ok);
+}
+.arc-status--paused .arc-status__dot {
+  background: var(--warn);
+}
+.arc-status--gameOver .arc-status__dot {
+  background: var(--danger);
+}
+
+/* ─── Overlay ───────────────────────────────────────────────── */
+.arc-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(3px);
+  border-radius: inherit;
+  z-index: 10;
+}
+.arc-overlay__card {
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 20px 22px;
+}
+.arc-overlay__title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+}
+.arc-overlay__msg {
+  margin: 0 0 14px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+.arc-overlay__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* ─── Autosave badge ────────────────────────────────────────── */
+.arc-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  color: var(--text-mute);
+}
+.arc-save__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+.arc-save__discard {
+  border: 0;
+  background: none;
+  padding: 0 0 0 4px;
+  font: inherit;
+  color: var(--text-dim);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ─── Key help ──────────────────────────────────────────────── */
+.arc-keys {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+.arc-keys li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.arc-keys li > span:first-child {
+  display: inline-flex;
+  gap: 4px;
+}
+
+/* ─── Form controls ─────────────────────────────────────────── */
+.arc-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.arc-field input[type='range'] {
+  accent-color: var(--game-color, var(--accent));
+  flex: 1;
+}
+.arc-field input[type='checkbox'] {
+  accent-color: var(--game-color, var(--accent));
+}
+.arc-segmented {
+  display: inline-flex;
+  padding: 3px;
+  gap: 3px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg-soft);
+}
+.arc-segmented button {
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.arc-segmented--full {
+  display: flex;
+  width: 100%;
+}
+.arc-segmented--full > button {
+  flex: 1;
+}
+.arc-segmented button[aria-pressed='true'] {
+  background: var(--panel-bg);
+  color: var(--text-strong);
+  box-shadow: 0 0 0 1px var(--game-color, var(--accent)) inset;
+}
+
+/* ─── Game layout (shared by all games) ─────────────────────── */
+.arc-game {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.arc-game__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.arc-game__title {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+}
+.arc-game__sub {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.arc-game__board {
+  position: relative;
+  border-radius: var(--radius-lg);
+}
+
+/* ─── Standalone page shell ─────────────────────────────────── */
+.arc-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(900px 300px at 10% -10%, color-mix(in oklab, var(--game-color, var(--accent)) 10%, transparent), transparent 70%),
+    var(--bg);
+}
+.arc-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 20px;
+  background: color-mix(in oklab, var(--bg-elev) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--panel-border);
+}
+.arc-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+.arc-brand__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: white;
+  background: linear-gradient(135deg, var(--accent) 0%, #b07cff 100%);
+  box-shadow: 0 6px 18px rgba(107, 140, 255, 0.35);
+}
+.arc-brand__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+.arc-brand__text strong {
+  font-size: 13.5px;
+  color: var(--text-strong);
+}
+.arc-brand__text span {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--game-color, var(--text-mute));
+}
+.arc-topbar__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.arc-menu {
+  position: relative;
+}
+.arc-menu summary {
+  list-style: none;
+}
+.arc-menu summary::-webkit-details-marker {
+  display: none;
+}
+.arc-menu__list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 200px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+.arc-menu__list a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13px;
+}
+.arc-menu__list a:hover {
+  background: var(--panel-bg-soft);
+}
+.arc-menu__list small {
+  margin-left: auto;
+  color: var(--text-mute);
+  font-size: 11px;
+}
+.arc-menu__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--game-color);
+}
+/* Language menu (globe + code) and dental-mode toggle in the top bar. */
+.arc-lang {
+  position: relative;
+}
+.arc-lang__btn,
+.arc-dental-toggle {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.arc-lang__btn:hover,
+.arc-dental-toggle:hover {
+  border-color: var(--game-color, var(--accent));
+}
+.arc-lang__btn:focus-visible,
+.arc-dental-toggle:focus-visible,
+.arc-lang__list button:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+.arc-lang__code {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.arc-lang__list {
+  min-width: 170px;
+  z-index: 30;
+}
+.arc-lang__list button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.arc-lang__list button:hover {
+  background: var(--panel-bg-soft);
+}
+.arc-lang__list button[aria-pressed='true'] {
+  font-weight: 700;
+}
+.arc-lang__list small {
+  margin-left: auto;
+  color: var(--text-mute);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.arc-lang__mark {
+  width: 12px;
+  text-align: center;
+}
+.arc-dental-toggle__icon {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  /* Off: hollow outline tooth. On: filled tooth + check badge (shape, not just colour). */
+  --arc-tooth-fill: transparent;
+  --arc-tooth-stroke: currentColor;
+  --arc-tooth-shine: transparent;
+}
+.arc-dental-toggle--on {
+  border-color: var(--game-color, var(--accent));
+  background: color-mix(in oklab, var(--game-color, var(--accent)) 16%, var(--panel-bg));
+}
+.arc-dental-toggle--on .arc-dental-toggle__icon {
+  --arc-tooth-fill: #f7f8fb;
+  --arc-tooth-stroke: #6b7080;
+  --arc-tooth-shine: #fff;
+}
+.arc-dental-toggle__check {
+  position: absolute;
+  right: -5px;
+  bottom: -3px;
+  padding: 1px;
+  border-radius: 50%;
+  background: var(--game-color, var(--accent));
+  color: #0f1016;
+}
+.arc-keys__heading {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.arc-page__main {
+  flex: 1;
+  padding: 24px 20px 32px;
+}
+.arc-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px 22px;
+  font-size: 12px;
+  color: var(--text-mute);
+  border-top: 1px solid var(--panel-border);
+}
+.arc-footer a {
+  color: var(--text-dim);
+}
+@media (max-width: 640px) {
+  .arc-topbar {
+    padding: 8px 12px;
+  }
+  .arc-topbar__nav > a.arc-btn,
+  .arc-dental-toggle__label {
+    display: none;
+  }
+  .arc-page__main {
+    padding: 16px 12px 24px;
+  }
+}
+
+/* ─── Landing-page demos ────────────────────────────────────── */
+.arc-demo {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arc-btn,
+  .arc-overlay {
+    transition: none;
+  }
+}
+
+/* ─── Playing card (French deck) ────────────────────────────── */
+.arc-card {
+  display: block;
+  height: auto;
+  flex: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+  transition: transform calc(220ms * var(--anim, 1)) ease-out, filter calc(220ms * var(--anim, 1)) ease-out;
+}
+.arc-card--down {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+/* Selected: raised and outlined (never colour alone). */
+.arc-card--selected {
+  transform: translateY(-14%);
+  filter: drop-shadow(0 0 0.5px #000) drop-shadow(0 0 6px var(--hl, #f4b860)) drop-shadow(0 6px 6px rgba(0, 0, 0, 0.45));
+}

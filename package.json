@@ -1,0 +1,66 @@
+{
+  "name": "solitaire-game",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Type-safe Solitaire in React + Vite + TypeScript — Klondike (draw 1 / draw 3), Spider (1, 2 or 4 suits) and FreeCell (Microsoft deal numbers) with unlimited undo, safe auto-moves to the foundations, autosave & resume, shared Zoltan’s Arcade stats. Part of Arcade-Game-Center.",
+  "license": "MIT",
+  "author": "Zoltán Dul",
+  "homepage": "https://github.com/ZoliQua/Solitaire-Game#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZoliQua/Solitaire-Game.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ZoliQua/Solitaire-Game/issues"
+  },
+  "keywords": [
+    "solitaire",
+    "patience",
+    "klondike",
+    "spider-solitaire",
+    "freecell",
+    "card-game",
+    "game",
+    "react",
+    "typescript",
+    "vite",
+    "arcade-game-center"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.15.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "globals": "^15.12.0",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.15.0",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.9"
+  }
+}
