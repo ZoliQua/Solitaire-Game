@@ -1,0 +1,151 @@
+.table {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--cw, 80px) * 0.22);
+  padding: 4px 0 8px;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Hint rings never cause a sideways scroll on a phone. */
+  overflow-x: clip;
+}
+
+.row {
+  display: grid;
+  justify-content: center;
+  align-items: start;
+}
+
+.columns {
+  min-height: calc(var(--cw, 80px) * 2.4);
+}
+
+.pile {
+  position: relative;
+  border-radius: 8px;
+  outline: none;
+}
+
+.pile:focus-visible,
+.focused:focus-visible {
+  box-shadow: 0 0 0 2px var(--panel-bg, #111), 0 0 0 4px var(--game-color, var(--accent));
+}
+
+.slot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  border: 2px dashed var(--panel-border);
+  border-radius: calc(var(--cw, 80px) * 0.11);
+  background: var(--panel-bg-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-mute);
+}
+
+.slotText {
+  font-weight: 800;
+  font-size: calc(var(--cw, 80px) * 0.36);
+  opacity: 0.55;
+}
+
+.slotIcon {
+  display: flex;
+  opacity: 0.7;
+}
+
+.redeal {
+  font-size: calc(var(--cw, 80px) * 0.5);
+  opacity: 0.75;
+}
+
+.card {
+  position: absolute;
+  touch-action: none;
+}
+
+.card :global(.arc-card) {
+  pointer-events: none;
+}
+
+.grab {
+  cursor: grab;
+}
+
+.dragging {
+  cursor: grabbing;
+  pointer-events: none;
+  transition: none;
+}
+
+.dragging :global(.arc-card) {
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.45));
+}
+
+.picked :global(.sol-suitmark) {
+  transform: translateY(-14%);
+}
+
+.card :global(.sol-suitmark) {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  transition: transform calc(220ms * var(--anim, 1)) ease-out;
+}
+
+/* Hints: dashed (source) and solid (target) rings, plus an arrow tag — never colour alone. */
+.hint_from,
+.hint_to {
+  border-radius: 8px;
+}
+
+.hint_from::after,
+.hint_to::after {
+  position: absolute;
+  inset: -5px;
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 2000;
+  content: '';
+}
+
+.hint_from::after {
+  border: 3px dashed var(--game-color, var(--accent));
+}
+
+.hint_to::after {
+  border: 3px solid var(--game-color, var(--accent));
+  box-shadow: 0 0 12px var(--game-color, var(--accent));
+}
+
+.hint_from::before,
+.hint_to::before {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  z-index: 2001;
+  min-width: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--game-color, var(--accent));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+}
+
+.hint_from::before {
+  content: '1';
+}
+
+.hint_to::before {
+  content: '2';
+}

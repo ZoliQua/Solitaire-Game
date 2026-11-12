@@ -1,0 +1,82 @@
+.game {
+  max-width: 1180px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 290px);
+  gap: 18px;
+  align-items: start;
+  justify-content: center;
+}
+
+.boardWrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 320px;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.buttons + .buttons {
+  margin-top: 8px;
+}
+
+.buttons > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.save {
+  margin-top: 10px;
+  min-height: 16px;
+}
+
+.settings {
+  display: grid;
+  gap: 12px;
+}
+
+.setting {
+  display: grid;
+  gap: 6px;
+}
+
+.settingLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.settings :global(.arc-segmented) button {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.dentalRow {
+  cursor: pointer;
+}
+
+.note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-mute);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
