@@ -121,14 +121,18 @@ describe('<SolitaireGame />', () => {
     expect(cardsIn('waste')).toBe('QH 5H');
   });
 
-  it('auto-complete finishes a nearly won Klondike and records the win', () => {
+  it('auto-complete finishes a nearly won Klondike and the win calls onGameOver(score)', () => {
     const onGameOver = vi.fn();
     const onRunEnd = vi.fn();
     resume(nearlyWonKlondike(), { onGameOver, onRunEnd });
     expect(screen.getByRole('status').textContent).toMatch(/press A to finish/);
     key('a');
     expect(screen.getByRole('dialog', { name: 'You won!' })).toBeTruthy();
-    expect(onRunEnd).toHaveBeenCalledWith(expect.objectContaining({ outcome: 'win' }));
+    // 10 s on a 300 s par, no undo: the full 1000 for Klondike draw 1.
+    expect(onGameOver).toHaveBeenCalledTimes(1);
+    expect(onGameOver).toHaveBeenCalledWith(1000);
+    expect(onRunEnd).toHaveBeenCalledWith(expect.objectContaining({ outcome: 'win', score: 1000 }));
+    expect(stat('Score')).toBe('1,000');
     // A won game is not kept as a save.
     expect(loadSession('solitaire', SESSION_SCHEMA)).toBeNull();
   });

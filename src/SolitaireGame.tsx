@@ -52,6 +52,7 @@ import {
 } from './logic/game';
 import { History } from './logic/history';
 import { canAutoComplete, isLegalMove, isWon } from './logic/moves';
+import { solitaireScore } from './logic/scoring';
 import type { Loc, Move, Variant } from './logic/types';
 import styles from './SolitaireGame.module.css';
 
@@ -195,8 +196,7 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
     setMessage(null);
     if (isWon(next.state) && !isWon(prev.state)) {
       const secs = Math.max(1, secondsRef.current);
-      // Scoring lands with the score model; a win is recorded with 0 points until then.
-      setFinal({ score: 0, seconds: secs });
+      setFinal({ score: solitaireScore(next.mode, secs, next.undos), seconds: secs });
     }
     return true;
   }, []);

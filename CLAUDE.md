@@ -50,9 +50,13 @@ src/
     freecell.ts        # dealFreeCell (Microsoft deal) + FreeCell moves (supermove limit)
     moves.ts           # variant-agnostic legalMoves / applyMove / isWon / autoFoundation / canAutoComplete
     history.ts         # History: push / undo of immutable states
+    game.ts            # modes, playMove (+ safe auto-moves), undo, auto-complete, hints, click targets, save validator
+    scoring.ts         # base × timeFactor × undoFactor (only a won game scores; max 4000)
     *.test.ts
+  components/          # Table, Pile, SuitMark, useDrag (pointer events), layout, DentalToggle
+  i18n.ts              # en / hu / de strings
   SolitaireGame.tsx    # embeddable game, ArcadeGameProps
-  demo/SolitaireDemo.tsx
+  demo/                # SolitaireDemo + script.ts (scripted solution of FreeCell deal #164)
   App.tsx              # exactly <ArcadeShell gameId="solitaire"><SolitaireGame /></ArcadeShell>
   main.tsx             # imports arcade/arcade.css once, applyTheme(readTheme())
   index.ts             # exports SolitaireGame, SolitaireDemo, default

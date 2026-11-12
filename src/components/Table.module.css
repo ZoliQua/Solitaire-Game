@@ -10,6 +10,8 @@
   -webkit-user-select: none;
   /* Hint rings never cause a sideways scroll on a phone. */
   overflow-x: clip;
+  /* Card z-indexes stay inside the table, so the kit overlay (z-index 10) always covers it. */
+  isolation: isolate;
 }
 
 .row {
