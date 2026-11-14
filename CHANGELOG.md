@@ -6,6 +6,27 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-14
+
+### Added
+- Rules dialog (*Rules* button or **R**, pauses the game): goal with the three games' rule texts and a diagram of an alternating
+  black (♠ ♣) / red (♥ ♦) run with suit symbols and written groups (tooth back and foundation in dental mode), mouse / keyboard or
+  touch controls, the table rules and the scoring — every number taken from the real constants and helpers (bases, par times,
+  time floor, undo step and floor, the 4000 cap, the FreeCell supermove, the 200-step undo).
+- Finish early: the *Finish* button ends the game after an in-page confirm; it is ranked with 0 points (outcome `finished`,
+  `onGameOver(0, { finished: true })`), because only a won game scores; the save is dropped and the game-over card says so.
+- Touch controls on phones: tap a card to select it (with the cards on it), tap a column, free cell or foundation to move the
+  selection there, double-tap a card to send it home, tap the table to drop the selection; finger drag still works, mouse
+  drag and click-to-move are unchanged. Touch help in the Controls panel and touch wording in the status line.
+- Full screen button (native full screen, or the kit's full-window mode on iPhone).
+- The card size is also capped by the screen height (a phone in landscape shows the whole table); below 430 px the columns sit
+  closer and face-down cards overlap more tightly. `viewport-fit=cover` for the iPhone safe areas.
+- README in English, German and Hungarian; the family table lists all fifteen games.
+
+### Changed
+- The auto-complete button is now called *Auto-complete* / „Mindet fel” / „Alle ablegen”, so it is not confused with *Finish*.
+- The Score panel shows 0 until a win (it showed “—”).
+
 ## [1.0.0] - 2026-11-12
 
 ### Added

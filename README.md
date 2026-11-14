@@ -1,10 +1,12 @@
 # ♠️ Solitaire
 
+**English** · [Deutsch](README.de.md) · [Magyar](README.hu.md)
+
 A type-safe Solitaire built with **React 18**, **Vite** and **TypeScript**: three classic patience games on one table —
 **Klondike** (draw 1 or draw 3), **Spider** (1, 2 or 4 suits) and **FreeCell** (the Microsoft deal numbers). Drag a card or a
-run, click a card to send it to the best place, or play the whole game from the keyboard. Hints, undo, safe auto-moves and
+run, click a card to send it to the best place, tap your way through it on a phone, or play the whole game from the keyboard. Hints, undo, safe auto-moves and
 one-key auto-complete included; suits are told apart by shape, so colour is only a bonus.
-Runs on its own **and** as one of the fourteen games of **[Zoltan's Arcade](https://github.com/ZoliQua/Arcade-Game-Center)**:
+Runs on its own **and** as one of the fifteen games of **[Zoltan's Arcade](https://github.com/ZoliQua/Arcade-Game-Center)**:
 play it at [dulzoltan.hu/arcade/#/play/solitaire](https://dulzoltan.hu/arcade/#/play/solitaire).
 
 [![CI](https://github.com/ZoliQua/Solitaire-Game/actions/workflows/ci.yml/badge.svg)](https://github.com/ZoliQua/Solitaire-Game/actions/workflows/ci.yml)
@@ -23,6 +25,7 @@ play it at [dulzoltan.hu/arcade/#/play/solitaire](https://dulzoltan.hu/arcade/#/
 - [Quick start](#-quick-start)
 - [Games and rules](#-games-and-rules)
 - [Controls](#%EF%B8%8F-controls)
+- [On a phone](#-on-a-phone)
 - [Scoring & stats](#-scoring--stats)
 - [Autosave & resume](#-autosave--resume)
 - [Embedding in Arcade-Game-Center](#-embedding-in-arcade-game-center)
@@ -52,12 +55,15 @@ Every game is a standalone repo that also plugs into the portal. They share one 
 | 💣 Minesweeper | [Minesweeper-Game](https://github.com/ZoliQua/Minesweeper-Game) | Logic |
 | ♠️ **Solitaire** (this repo) | [Solitaire-Game](https://github.com/ZoliQua/Solitaire-Game) | Cards |
 | 🎴 Ulti | [Ulti-Game](https://github.com/ZoliQua/Ulti-Game) | Cards |
+| 🂡 Snapszer | [Snapszer-Game](https://github.com/ZoliQua/Snapszer-Game) | Cards |
 
 ## ✨ Features
 
 - 🃏 **Three games, six variants**: Klondike draw 1 / draw 3, Spider 1 / 2 / 4 suits, FreeCell
 - 🖱️ **Drag and drop** of a card or a whole valid run (mouse, pen and touch through pointer events); an illegal drop snaps back
-- 👆 **Click-to-move**: a click sends the card (and the cards on it) to the best legal place — home first, then a column with
+- 👆 **Touch play**: on a phone, tap a card to select it (with the cards on it), tap a column, free cell or foundation to put it
+  there, double-tap a card to send it home; dragging with a finger works too
+- 🖱️ **Click-to-move**: a mouse click sends the card (and the cards on it) to the best legal place — home first, then a column with
   cards (in Spider the same suit first), then an empty column, then a free cell
 - ⌨️ **Full keyboard play**: **Tab** between piles, **Enter** picks up and puts down, **↑ / ↓** change how many cards you hold
 - 💡 **Hints** (**H**): a dashed ring with “1” on the source and a solid ring with “2” on the target, plus the move in words —
@@ -65,6 +71,12 @@ Every game is a standalone repo that also plugs into the portal. They share one 
 - ↩️ **Undo** (**U** / **Ctrl+Z**), up to 200 steps; it costs a little score
 - 🏠 **Safe auto-moves**: aces, twos and any card no column can still need go home by themselves after each move (not after you
   take a card back down from a foundation — that would undo your move)
+- 📖 **Rules** (**R** or the *Rules* button): goal, controls, the rules of all three games, the scoring with its real numbers and a
+  diagram of an alternating run — opening it pauses the game
+- 🏁 **Finish early**: the *Finish* button ends the game after a confirm; it goes on the leaderboard with 0 points, because only a
+  won game scores
+- ⛶ **Full screen**: the *Full screen* button lets the table fill the screen (on iPhone a full-window mode, since Safari has no
+  full-screen API for pages)
 - ⏩ **Auto-complete** (**A**): once every card is open (Klondike: stock and waste empty; FreeCell: every column in order) one key
   plays the rest home
 - 🎴 **Kit playing cards**: the arcade's four-colour French deck (♠ black, ♥ red, ♦ blue, ♣ green) or a single grey tone
@@ -80,11 +92,12 @@ Every game is a standalone repo that also plugs into the portal. They share one 
   presentation only
 - 🤖 **Attract-mode demo** (`<SolitaireDemo />`) — replays a scripted solution of FreeCell deal #164 on the real engine
 - 📱 **Phone-friendly** — the cards scale with the table width, so a 360 px screen fits all seven Klondike, eight FreeCell and ten
-  Spider columns without horizontal scroll (Spider's columns sit closer and overlap more tightly); long columns squeeze to fit
+  Spider columns without horizontal scroll (below 430 px the columns sit closer and face-down cards overlap more tightly); the card
+  size is also capped by the screen height, so a phone in landscape still shows the whole table; long columns squeeze to fit
 - ♿ **Accessible** — every pile is a focusable button labelled with its contents
   (`Column 3: 5 cards (3 face down), top: Seven of hearts`)
 - 🧪 **Tested** — rules of all three engines, the deal formats, undo, scoring, hints, click targets, saves, drag and drop,
-  keyboard play, auto-complete, languages, dental mode and the demo
+  keyboard play, touch play, the rules dialog, finishing early, full screen, auto-complete, languages, dental mode and the demo
 
 ## 🚀 Quick start
 
@@ -123,22 +136,31 @@ remembered (`solitaire.mode`), and so is the deck (`solitaire.deck`).
 | Key | Action |
 | --- | --- |
 | 🖱️ Drag a card | Move it and every card on it; drop on a pile |
-| 🖱️ Click / tap a card | Send it to the best legal place |
+| 🖱️ Click a card | Send it to the best legal place |
 | 🖱️ Click the stock | Draw (Klondike) / deal a row (Spider) |
 | **Tab** / **Shift+Tab** | Move between piles |
 | **Enter** / **Space** on a pile | Pick up its movable cards; on another pile, put them down; on the same pile, send them to the best place |
 | **↑** / **↓** | Hold more / fewer cards of the picked run |
 | **H** | Hint |
 | **U** / **Ctrl+Z** / **Cmd+Z** | Undo |
-| **A** | Finish (auto-complete) |
+| **A** | Auto-complete (every card home) |
 | **D** | Draw / deal from the stock |
 | **N** | New game (asks first) |
 | **Esc** | Drop what you picked up · pause |
 | **Enter** | Start · play again (outside a pile) |
 | **P** | Pause / resume |
+| **R** | Rules (pauses the game) |
 | **T** | Toggle dark / light theme (standalone page) |
 
 Hotkeys are ignored while you type in a form field or hold Cmd/Ctrl/Alt (Ctrl/Cmd+Z excepted).
+
+## 📱 On a phone
+
+Tap a card to select it — the cards on top of it come along, and the status line says what you hold. Then tap the column, free
+cell or foundation where it should go; if it does not fit there, the tapped card becomes your new selection instead. Double-tap a
+card to send it home (if it cannot go home, it goes to the best other place). You can also drag cards with your finger, tap the
+stock to draw or deal, and tap the table between the piles to drop the selection. The table never scrolls or zooms under your
+finger. *Full screen* gives the cards the whole screen; on an iPhone, **Share → Add to Home Screen** also hides the browser bars.
 
 ## 🎯 Scoring & stats
 
@@ -159,9 +181,10 @@ undoFactor = max(0.5, 1 − 0.02 × undos)
 | Spider 4 suits | 4000 | 600 s |
 | FreeCell | 2000 | 420 s |
 
-The highest possible score is **4000** (Spider, four suits, on par, no undo). A won game is recorded once with outcome `win`; a game
-abandoned through **New game** or a variant switch is **not** recorded. The stat strip shows **Moves**, the active **Time**, the
-**Score** (after a win) and **Best**. Every finished game is recorded by the kit under `arcade.stats.solitaire`.
+The highest possible score is **4000** (Spider, four suits, on par, no undo). A won game is recorded once with outcome `win`. The
+**Finish** button ends a game early after a confirm: it is recorded with outcome `finished` and goes on the leaderboard with
+**0** points. A game abandoned through **New game** or a variant switch is **not** recorded. The stat strip shows **Moves**, the
+active **Time**, the **Score** (0 until you win) and **Best**. Every finished game is recorded by the kit under `arcade.stats.solitaire`.
 
 ## 💾 Autosave & resume
 
@@ -169,7 +192,7 @@ The session is the whole game: the variant, the position, the undo history (at m
 the clock (key `arcade.session.solitaire`, schema-versioned). A validator checks every saved position — pile counts per variant
 and the whole deck present (52 or 104 cards) — and rejects a save whose variant does not match its position. It is saved about
 once a second, whenever the page is hidden and when the game unmounts. Reloading shows **Welcome back** with the game paused.
-A won game is never restored, so it can never be recorded twice; **Discard** next to the *Autosaved* badge drops the save.
+A won or finished game is never restored, so it can never be recorded twice; **Discard** next to the *Autosaved* badge drops the save.
 
 ## 🧩 Embedding in Arcade-Game-Center
 
@@ -178,7 +201,7 @@ import { SolitaireGame, SolitaireDemo } from '@arcade/solitaire';
 
 <SolitaireGame
   embedded                                   // hide the page title; the portal shows it
-  onGameOver={(score) => submitScore('solitaire', score)}  // won games with points > 0
+  onGameOver={(score, info) => submitScore('solitaire', score, info)}  // won games; Finish reports 0 with { finished: true }
   onRunEnd={(run) => console.log(run.outcome, run.score)}  // every finished game
   onStatusChange={({ status, score, seconds }) => updateHeader(status, seconds)}
 />
@@ -187,7 +210,7 @@ import { SolitaireGame, SolitaireDemo } from '@arcade/solitaire';
 
 Both components follow the shared `ArcadeGameProps` / `ArcadeDemoProps` contract from `src/arcade/types.ts`.
 Status mapping: `idle` before the first game of a visit (Start overlay), `running` while a game is played, `paused` while suspended
-(or restored), `gameOver` once the game is won.
+(or restored), `gameOver` once the game is won or finished early.
 
 ## 🧪 Scripts
 
@@ -214,6 +237,8 @@ src/
     game.ts               modes, playMove (+ safe auto-moves), undo, auto-complete, hints, click targets, save validator
     scoring.ts            base × timeFactor × undoFactor
   components/             Table, Pile, SuitMark, useDrag (pointer events), layout (card size, fans), DentalToggle
+  rules.tsx               Rules dialog sections (numbers from the real constants) and the run diagram
+  labels.ts               variant / mode names and the touch help rows
   demo/                   SolitaireDemo + the scripted FreeCell solution
   SolitaireGame.tsx       the embeddable game (ArcadeGameProps)
   i18n.ts                 en / hu / de strings
@@ -222,7 +247,7 @@ src/
   index.ts                package entry used by Arcade-Game-Center
 ```
 
-The UI changes the position only through the engine (`playMove`, `undoGame`, `autoComplete` in `logic/game.ts`), which never
+The UI changes the position only through the engine (`playMove`, `undoGame`, `autoComplete`, `finishGame` in `logic/game.ts`), which never
 mutates its input — undo simply restores a stored state.
 
 ## 🤝 Contributing
