@@ -89,7 +89,11 @@ export type KitMessageKey =
   | 'autosaved' | 'discard' | 'savedJustNow' | 'savedSeconds' | 'savedMinutes' | 'savedHours'
   | 'controls'
   | 'openArcade' | 'otherGames' | 'moreGames' | 'playAll' | 'switchToLight' | 'switchToDark' | 'toggleTheme'
-  | 'language' | 'dental' | 'dentalDesc' | 'onGitHub' | 'partOf' | 'license';
+  | 'language' | 'dental' | 'dentalDesc' | 'onGitHub' | 'partOf' | 'license'
+  | 'rulesButton' | 'rulesTitle' | 'rulesGoal' | 'rulesPlay' | 'rulesRules' | 'rulesScoring' | 'rulesDental'
+  | 'rulesMobile' | 'rulesClose'
+  | 'finishButton' | 'finishConfirm' | 'finishYes' | 'finishNo' | 'finishedEarly'
+  | 'fullscreen' | 'fullscreenExit' | 'iosHomeScreenTip' | 'touchControls';
 
 /** Shared chrome strings, also available to games for their common labels. */
 export const KIT_MESSAGES: Messages<KitMessageKey> = {
@@ -133,6 +137,24 @@ export const KIT_MESSAGES: Messages<KitMessageKey> = {
     onGitHub: '{name} on GitHub',
     partOf: 'Part of {link}',
     license: 'MIT © {author}',
+    rulesButton: 'Rules',
+    rulesTitle: '{game} — rules',
+    rulesGoal: 'Goal',
+    rulesPlay: 'How to play',
+    rulesRules: 'Rules',
+    rulesScoring: 'Scoring',
+    rulesDental: 'Dental mode',
+    rulesMobile: 'On mobile',
+    rulesClose: 'Close',
+    finishButton: 'Finish',
+    finishConfirm: 'Finish the game? {score} points go on the leaderboard.',
+    finishYes: 'Finish',
+    finishNo: 'Cancel',
+    finishedEarly: 'Finished early',
+    fullscreen: 'Full screen',
+    fullscreenExit: 'Exit full screen',
+    iosHomeScreenTip: 'No browser bars: Share → Add to Home Screen.',
+    touchControls: 'Touch controls',
   },
   hu: {
     statusIdle: 'Indulhat',
@@ -174,6 +196,24 @@ export const KIT_MESSAGES: Messages<KitMessageKey> = {
     onGitHub: '{name} a GitHubon',
     partOf: 'Az {link} része',
     license: 'MIT © {author}',
+    rulesButton: 'Szabályok',
+    rulesTitle: '{game} — szabályok',
+    rulesGoal: 'Cél',
+    rulesPlay: 'Így játssz',
+    rulesRules: 'Szabályok',
+    rulesScoring: 'Pontozás',
+    rulesDental: 'Fogas mód',
+    rulesMobile: 'Mobilon',
+    rulesClose: 'Bezárás',
+    finishButton: 'Befejezés',
+    finishConfirm: 'Befejezed a játékot? {score} pont kerül a ranglistára.',
+    finishYes: 'Befejezem',
+    finishNo: 'Mégse',
+    finishedEarly: 'Idő előtt befejezve',
+    fullscreen: 'Teljes képernyő',
+    fullscreenExit: 'Kilépés',
+    iosHomeScreenTip: 'Böngészősáv nélkül: Megosztás → Főképernyőhöz adás.',
+    touchControls: 'Érintéses irányítás',
   },
   de: {
     statusIdle: 'Bereit',
@@ -215,5 +255,23 @@ export const KIT_MESSAGES: Messages<KitMessageKey> = {
     onGitHub: '{name} auf GitHub',
     partOf: 'Teil von {link}',
     license: 'MIT © {author}',
+    rulesButton: 'Regeln',
+    rulesTitle: '{game} — Regeln',
+    rulesGoal: 'Ziel',
+    rulesPlay: 'So spielst du',
+    rulesRules: 'Regeln',
+    rulesScoring: 'Punktewertung',
+    rulesDental: 'Zahnmodus',
+    rulesMobile: 'Auf dem Handy',
+    rulesClose: 'Schließen',
+    finishButton: 'Beenden',
+    finishConfirm: 'Spiel beenden? {score} Punkte kommen in die Bestenliste.',
+    finishYes: 'Beenden',
+    finishNo: 'Abbrechen',
+    finishedEarly: 'Vorzeitig beendet',
+    fullscreen: 'Vollbild',
+    fullscreenExit: 'Vollbild beenden',
+    iosHomeScreenTip: 'Ohne Browserleisten: Teilen → Zum Home-Bildschirm.',
+    touchControls: 'Touch-Steuerung',
   },
 };

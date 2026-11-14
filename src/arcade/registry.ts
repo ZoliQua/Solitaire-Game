@@ -212,6 +212,19 @@ const GAMES: readonly Omit<ArcadeGameInfo, 'tagline'>[] = [
     },
     colorVar: '--game-ulti',
   },
+  {
+    id: 'snapszer',
+    name: 'Snapszer',
+    names: { de: 'Schnapsen' },
+    repo: 'https://github.com/ZoliQua/Snapszer-Game',
+    tag: 'Cards',
+    taglines: {
+      en: 'The Hungarian two- and three-player trick game, with the Hungarian deck.',
+      hu: 'A magyar ütésvivő kártyajáték két vagy három játékossal, magyar kártyával.',
+      de: 'Das ungarische Stichspiel zu zweit oder zu dritt, mit ungarischem Blatt.',
+    },
+    colorVar: '--game-snapszer',
+  },
 ];
 
 export const ARCADE_GAMES: readonly ArcadeGameInfo[] = GAMES.map((g) => ({ ...g, tagline: g.taglines.en }));

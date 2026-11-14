@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { formatSavedAt } from '../format';
 import { useKitMessages, useLang } from '../hooks';
 import type { KitMessageKey } from '../i18n';
+import { useIsTouch } from '../touch';
 import type { ArcadeStatus } from '../types';
 
 export type StatItem = {
@@ -121,9 +122,12 @@ export function SaveBadge({ savedAt, onDiscard }: { savedAt: number | null; onDi
 /**
  * Uniform keyboard help list. `heading`: `true` shows the translated
  * "Controls" title, a node shows that instead; omitted, no title (as before).
+ * Renders nothing on a touch device (`useIsTouch()`); pair it with `TouchHelp`.
  */
 export function KeyHelp({ rows, heading }: { rows: [keys: string, action: string][]; heading?: ReactNode | boolean }) {
   const t = useKitMessages();
+  const touch = useIsTouch();
+  if (touch) return null;
   const list = (
     <ul className="arc-keys" aria-label={heading ? undefined : t('controls')}>
       {rows.map(([keys, action]) => (
@@ -146,5 +150,25 @@ export function KeyHelp({ rows, heading }: { rows: [keys: string, action: string
       <h3 className="arc-keys__heading">{heading === true ? t('controls') : heading}</h3>
       {list}
     </section>
+  );
+}
+
+/**
+ * Touch counterpart of `KeyHelp`: rows of [gesture, action], e.g. ["Swipe", "Turn"].
+ * Renders only on a touch device (`useIsTouch()`), so it can sit right next to `KeyHelp`.
+ */
+export function TouchHelp({ rows }: { rows: [gesture: string, action: string][] }) {
+  const t = useKitMessages();
+  const touch = useIsTouch();
+  if (!touch) return null;
+  return (
+    <ul className="arc-keys arc-touch-help" aria-label={t('touchControls')}>
+      {rows.map(([gesture, action]) => (
+        <li key={gesture}>
+          <span className="arc-gesture">{gesture}</span>
+          <span>{action}</span>
+        </li>
+      ))}
+    </ul>
   );
 }

@@ -46,6 +46,7 @@
   --game-minesweeper: #9aa4b8;
   --game-solitaire: #2fa36b;
   --game-ulti: #c8553d;
+  --game-snapszer: #b0703a;
 
   /* Tetromino palette (matches Tetris logic/constants.ts) */
   --tetro-I: #31c7ef;
@@ -99,6 +100,7 @@
   --game-minesweeper: #5b6577;
   --game-solitaire: #1f7a4f;
   --game-ulti: #9c3b27;
+  --game-snapszer: #8a5428;
   --shadow-sm: 0 2px 8px rgba(15, 16, 22, 0.06);
   --shadow-md: 0 8px 24px rgba(15, 16, 22, 0.1);
   --shadow-lg: 0 18px 48px rgba(15, 16, 22, 0.14);
@@ -267,10 +269,36 @@ body {
 .arc-stat--hl dd {
   color: var(--game-color, var(--accent));
 }
-@media (max-width: 560px) {
+/* Compact layout (phones): the stats become one slim strip above the board instead of a 2×2 block. */
+@media (max-width: 640px) {
+  /* The strip owns the full row; the status pill wraps under it instead of squeezing the values. */
+  .arc-stats {
+    gap: 6px 8px;
+    justify-content: flex-end;
+  }
   .arc-stats__grid {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(2, 1fr);
+    flex: 1 1 100%;
+    min-width: 0;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .arc-stat {
+    padding: 4px 6px;
+    border-radius: var(--radius-sm);
+  }
+  .arc-stat dt {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    margin-bottom: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .arc-stat dd {
+    font-size: 14px;
+  }
+  .arc-stats .arc-status {
+    padding: 3px 8px;
+    font-size: 11px;
   }
 }
 
@@ -391,6 +419,291 @@ body {
   gap: 4px;
 }
 
+/* Touch counterpart of the key help: gestures as outlined chips (shape, not colour). */
+.arc-gesture {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px dashed var(--panel-border-strong);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* ─── Touch: boards and on-screen pad ───────────────────────── */
+/* Gesture boards (swipe/drag): the page neither scrolls, zooms nor selects under the finger. */
+.arc-board-touch {
+  touch-action: none;
+  overscroll-behavior: contain;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Tap-only boards: no double-tap zoom and no 300 ms delay, the page can still scroll. */
+.arc-board-tap {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.arc-pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.arc-pad--row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+.arc-pad--row .arc-pad__btn {
+  flex: 1 1 0;
+  max-width: 96px;
+}
+.arc-pad__cross {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  grid-template-areas:
+    '. up .'
+    'left center right'
+    '. down .';
+  gap: 6px;
+}
+.arc-pad__extra {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.arc-pad__btn {
+  min-width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border: 1px solid var(--panel-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--panel-bg);
+  color: var(--text-strong);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.arc-pad__btn:active {
+  transform: translateY(1px);
+  background: var(--panel-bg-soft);
+  border-color: var(--game-color, var(--accent));
+}
+.arc-pad__icon {
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+}
+.arc-pad__label {
+  font-size: 11px;
+  line-height: 1.1;
+  color: var(--text-dim);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Full screen ───────────────────────────────────────────── */
+.arc-fs__btn svg {
+  flex: none;
+}
+@media (pointer: coarse) {
+  .arc-fs__btn {
+    min-height: 44px;
+  }
+}
+/* CSS immersive mode (iPhone Safari has no element Fullscreen API): the game root covers the viewport.
+   No transform/filter here, so the in-place kit modals (position: fixed) still cover the screen. */
+html[data-arcade-immersive] {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+html[data-arcade-immersive] .arc-topbar,
+html[data-arcade-immersive] .arc-footer {
+  display: none;
+}
+/* `:root` raises specificity above `.arc-game` and game modules (max-width, margin). */
+:root .arc-immersive,
+:root .arc-fullscreen {
+  background: var(--bg);
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding:
+    calc(env(safe-area-inset-top) + 8px)
+    calc(env(safe-area-inset-right) + 8px)
+    calc(env(safe-area-inset-bottom) + 8px)
+    calc(env(safe-area-inset-left) + 8px);
+}
+:root .arc-immersive {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  width: auto;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+}
+:root .arc-fullscreen {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+}
+.arc-fullscreen::backdrop {
+  background: var(--bg);
+}
+
+/* ─── Modals: Rules dialog, Finish confirm ──────────────────── */
+/* Fixed to the viewport but rendered in place (no portal), so it also shows inside a full-screen game. */
+.arc-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  background: var(--overlay-bg);
+  backdrop-filter: blur(3px);
+  overscroll-behavior: contain;
+}
+.arc-modal__card {
+  width: 100%;
+  max-height: 85vh;
+  max-height: 85dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  text-align: left;
+}
+.arc-modal__card:focus {
+  outline: none;
+}
+.arc-modal .arc-btn {
+  min-height: 44px;
+}
+
+.arc-rules__btn svg,
+.arc-finish__btn svg {
+  flex: none;
+}
+.arc-rules {
+  max-width: 560px;
+}
+.arc-rules__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 12px 20px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.arc-rules__title {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--text-strong);
+}
+.arc-rules__close {
+  flex: none;
+}
+.arc-rules__body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 20px 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.arc-rules__section {
+  padding-top: 12px;
+}
+.arc-rules__section + .arc-rules__section {
+  margin-top: 4px;
+  border-top: 1px dashed var(--panel-border);
+}
+.arc-rules__heading {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.arc-rules__section p {
+  margin: 0 0 8px;
+}
+.arc-rules__section ul,
+.arc-rules__section ol {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+.arc-rules__section li + li {
+  margin-top: 3px;
+}
+.arc-rules__section svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.arc-finish {
+  max-width: 360px;
+  padding: 20px 22px 18px;
+  text-align: center;
+}
+.arc-finish__msg {
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text-strong);
+}
+.arc-finish__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.arc-finish__actions .arc-btn {
+  flex: 1 1 120px;
+}
+@media (pointer: coarse) {
+  .arc-rules__btn,
+  .arc-finish__btn {
+    min-height: 44px;
+  }
+}
+@media (max-width: 480px) {
+  .arc-rules__head {
+    padding: 10px 10px 10px 14px;
+  }
+  .arc-rules__body {
+    padding: 4px 14px 14px;
+  }
+}
+
 /* ─── Form controls ─────────────────────────────────────────── */
 .arc-field {
   display: flex;
@@ -473,6 +786,7 @@ body {
 /* ─── Standalone page shell ─────────────────────────────────── */
 .arc-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background:
@@ -697,7 +1011,23 @@ body {
 }
 @media (max-width: 640px) {
   .arc-topbar {
+    flex-wrap: wrap;
+    row-gap: 6px;
     padding: 8px 12px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  .arc-topbar__nav {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-left: auto;
+  }
+  .arc-game {
+    gap: 10px;
+  }
+  .arc-game__title {
+    font-size: 20px;
   }
   .arc-topbar__nav > a.arc-btn,
   .arc-dental-toggle__label {

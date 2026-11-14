@@ -84,7 +84,10 @@ export type ArcadeRunOptions = {
    * result per run, even if `status` flickers or React re-runs effects.
    */
   runKey: string | number;
-  /** Evaluated when the run reaches `gameOver`. Defaults to `over`. */
+  /**
+   * Evaluated when the run reaches `gameOver`. Defaults to `over`. Return `finished` when the
+   * player used the Finish button: the score is then reported even when it is 0.
+   */
   outcome?: RunOutcome | (() => RunOutcome);
   /** Defaults to true. */
   ranked?: boolean;
@@ -128,7 +131,11 @@ export function useArcadeRun(opts: ArcadeRunOptions): ArcadeRunStats {
     };
     recordRun(gameId, run);
     o.props?.onRunEnd?.(run);
-    if (run.ranked && run.score > 0) o.props?.onGameOver?.(run.score);
+    if (!run.ranked) return;
+    // A run finished early ranks the shown score even when it is 0; natural game overs keep `> 0`
+    // so a crash in the first second does not fill the leaderboard with zeros.
+    if (outcome === 'finished') o.props?.onGameOver?.(run.score, { finished: true });
+    else if (run.score > 0) o.props?.onGameOver?.(run.score);
   }, [status, runKey, gameId]);
 
   const onStatusChange = props?.onStatusChange;

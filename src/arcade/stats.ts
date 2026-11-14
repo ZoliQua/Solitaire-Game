@@ -5,7 +5,7 @@ import type { ArcadeGameId, RunResult } from './types';
 /**
  * One scoring model for every game. A finished run updates:
  * - `plays`, `totalSeconds`, `lastScore`, `lastPlayedAt` always,
- * - `wins` when the outcome is a win,
+ * - `wins` when the outcome is a win (never for `finished`),
  * - `best` and `totalScore` only for ranked runs.
  */
 export type GameStats = {
