@@ -137,11 +137,13 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
   const state = game.state;
   const variant = state.variant;
   const won = isWon(state);
-  const status: ArcadeStatus = phase === 'idle' ? 'idle' : won ? 'gameOver' : phase === 'paused' ? 'paused' : 'running';
-  const running = status === 'running';
+  // An open confirm card pauses the run: the clock stops and the status reports paused.
+  const status: ArcadeStatus =
+    phase === 'idle' ? 'idle' : won ? 'gameOver' : phase === 'paused' || confirm !== null ? 'paused' : 'running';
+  const running = phase === 'live' && !won;
   const interactive = running && confirm === null;
 
-  const seconds = useRunTimer(running, runKey, runKey === 0 && resumable ? resumable.seconds : 0);
+  const seconds = useRunTimer(running && confirm === null, runKey, runKey === 0 && resumable ? resumable.seconds : 0);
   const secondsRef = useRef(seconds);
   secondsRef.current = seconds;
 
@@ -390,6 +392,8 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
       }
       const key = e.key;
       if (o.confirm) {
+        // A focused button ("Keep playing" or the confirm) answers Enter itself.
+        if (key === 'Enter' && isButtonTarget(e.target)) return;
         if (key === 'Enter') {
           e.preventDefault();
           o.confirmDialog();

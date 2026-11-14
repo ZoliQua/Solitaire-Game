@@ -100,7 +100,15 @@ describe('<SolitaireGame />', () => {
     act(() => void fireEvent.click(undoBtn));
     expect(cardsIn('tableau', 0)).toBe('8S');
     expect(cardsIn('tableau', 1)).toBe('7H');
+  });
+
+  it('Ctrl+Z takes the last move back', () => {
+    resume(POSITION());
+    tap(cardEl('7H', 'tableau', 1));
+    expect(cardsIn('tableau', 0)).toBe('8S 7H');
+    expect(cardsIn('tableau', 1)).toBe('');
     key('z', { ctrlKey: true });
+    expect(cardsIn('tableau', 0)).toBe('8S');
     expect(cardsIn('tableau', 1)).toBe('7H');
   });
 
@@ -155,6 +163,41 @@ describe('<SolitaireGame />', () => {
     expect(document.querySelectorAll('[data-pile="tableau"]')).toHaveLength(10);
     expect(stat('Moves')).toBe('0');
     expect(confirmSpy).not.toHaveBeenCalled();
+  });
+
+  it('Enter on a focused "Keep playing" button keeps the game', () => {
+    render(<SolitaireGame />);
+    key('Enter');
+    key('d');
+    act(() => void fireEvent.click(screen.getByRole('button', { name: 'Spider' })));
+    const dialog = screen.getByRole('dialog', { name: 'Switch to Spider · 1 suit?' });
+    const keep = within(dialog).getByRole('button', { name: /Keep playing/ });
+    keep.focus();
+    act(() => void fireEvent.keyDown(keep, { key: 'Enter' }));
+    expect(document.querySelectorAll('[data-pile="tableau"]')).toHaveLength(7);
+    expect(stat('Moves')).toBe('1');
+    // The browser then activates the focused button itself.
+    act(() => void fireEvent.click(keep));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.querySelectorAll('[data-pile="tableau"]')).toHaveLength(7);
+    expect(stat('Moves')).toBe('1');
+  });
+
+  it('the clock stops and the status reports paused while a confirm card is open', () => {
+    const onStatusChange = vi.fn();
+    render(<SolitaireGame onStatusChange={onStatusChange} />);
+    key('Enter');
+    key('d');
+    act(() => void vi.advanceTimersByTime(2100));
+    expect(stat('Time')).toBe('00:02');
+    act(() => void fireEvent.click(screen.getByRole('button', { name: 'Spider' })));
+    expect(onStatusChange).toHaveBeenLastCalledWith(expect.objectContaining({ status: 'paused' }));
+    act(() => void vi.advanceTimersByTime(10_000));
+    expect(stat('Time')).toBe('00:02');
+    key('Escape');
+    expect(onStatusChange).toHaveBeenLastCalledWith(expect.objectContaining({ status: 'running' }));
+    act(() => void vi.advanceTimersByTime(1100));
+    expect(stat('Time')).toBe('00:03');
   });
 
   it('switches at once when no move was made yet', () => {

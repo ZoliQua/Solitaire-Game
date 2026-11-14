@@ -55,6 +55,16 @@ describe('Solitaire i18n', () => {
     expect([MESSAGES.hu.deckColor, MESSAGES.hu.deckGrey, MESSAGES.de.deckColor, MESSAGES.de.deckGrey]).toEqual(['Színes', 'Szürke', 'Farbig', 'Grau']);
   });
 
+  it('names the colour groups explicitly in the Klondike and FreeCell rules (colour-blind friendly)', () => {
+    const groups = { en: /red \(♥ ♦\) and black \(♠ ♣\)/, hu: /piros \(♥ ♦\) és fekete \(♠ ♣\)/, de: /rote \(♥ ♦\) und schwarze \(♠ ♣\)/ };
+    for (const lang of LANGS) {
+      expect(MESSAGES[lang].rulesKlondike).toMatch(groups[lang]);
+      expect(MESSAGES[lang].rulesFreecell).toMatch(groups[lang]);
+      expect(MESSAGES[lang].rulesKlondike).not.toMatch(/alternating colours|váltakozó színnel|wechselnden Farben/);
+    }
+    expect(MESSAGES.hu.statusPickedRun).toMatch(/^\{n\} lapot vettél fel, az első: \{card\} — /);
+  });
+
   it('renders the German UI after applyLang("de")', () => {
     applyLang('de');
     render(<SolitaireGame />);

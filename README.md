@@ -103,9 +103,9 @@ Production build: `npm run build && npm run preview`. The build uses relative as
 
 | Game | Deal | Building | Goal |
 | --- | --- | --- | --- |
-| **Klondike** | 7 columns of 1…7 cards (top card up), 24 in the stock | Down in alternating colours; only a King (or a King-led run) fills an empty column | All 52 cards on the four foundations, ace to king |
+| **Klondike** | 7 columns of 1…7 cards (top card up), 24 in the stock | Down, alternating red (♥ ♦) and black (♠ ♣); only a King (or a King-led run) fills an empty column | All 52 cards on the four foundations, ace to king |
 | **Spider** | 104 cards: 10 columns of 6,6,6,6,5,5,5,5,5,5 (top up), 50 in the stock | Down regardless of suit; only same-suit runs move together; any card fills an empty column | Eight complete K→A same-suit runs, each removed as soon as it forms |
-| **FreeCell** | All 52 cards open in 8 columns (Microsoft deal numbers 1…32 000) | Down in alternating colours; 4 free cells hold one card each | All 52 cards home |
+| **FreeCell** | All 52 cards open in 8 columns (Microsoft deal numbers 1…32 000) | Down, alternating red (♥ ♦) and black (♠ ♣); 4 free cells hold one card each | All 52 cards home |
 
 - **Klondike** — *Draw 1* turns one card, *Draw 3* turns three; the last three waste cards are fanned but only the top one plays.
   Redeals are unlimited. A foundation's top card may come back down onto a column.
