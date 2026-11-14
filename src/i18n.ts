@@ -4,6 +4,7 @@ export type MessageKey = keyof typeof EN;
 
 const EN = {
   subtitle: 'Klondike, Spider and FreeCell — drag a card, click it, or play with the keyboard.',
+  subtitleTouch: 'Klondike, Spider and FreeCell — tap a card, then where it should go, or drag it.',
   variantKlondike: 'Klondike',
   variantSpider: 'Spider',
   variantFreecell: 'FreeCell',
@@ -124,6 +125,7 @@ const EN = {
 
 const HU: Record<MessageKey, string> = {
   subtitle: 'Klondike, Pók és FreeCell — húzd a lapot, kattints rá, vagy játssz billentyűzettel.',
+  subtitleTouch: 'Klondike, Pók és FreeCell — koppints egy lapra, aztán oda, ahová menjen, vagy húzd át.',
   variantKlondike: 'Klondike',
   variantSpider: 'Pók',
   variantFreecell: 'FreeCell',
@@ -244,6 +246,7 @@ const HU: Record<MessageKey, string> = {
 
 const DE: Record<MessageKey, string> = {
   subtitle: 'Klondike, Spider und FreeCell — zieh eine Karte, klick sie an oder spiel mit der Tastatur.',
+  subtitleTouch: 'Klondike, Spider und FreeCell — tipp eine Karte an, dann ihr Ziel, oder zieh sie.',
   variantKlondike: 'Klondike',
   variantSpider: 'Spider',
   variantFreecell: 'FreeCell',

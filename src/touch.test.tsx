@@ -48,9 +48,30 @@ function resume(state: SolitaireState) {
 const POSITION = () => klondikePosition({ tableau: ['8S', '7H', 'KD', '', '9C'], waste: 'AH' });
 
 describe('Solitaire touch controls', () => {
-  it('marks the table as a gesture board', () => {
+  it('marks the table as a tap board (the page still scrolls over empty table space); only grabbable cards take the gesture', () => {
+    resume(POSITION());
+    expect(document.querySelector('.arc-board-tap [data-testid="solitaire-table"]')).toBeTruthy();
+    expect(document.querySelector('.arc-board-touch')).toBeNull();
+    // Grabbable cards carry the drag class (touch-action: none); a face-down card does not.
+    expect(cardEl('7H', 'tableau', 1).className).toMatch(/grab/);
+  });
+
+  it('a 740×300 landscape screen gets cards small enough to show the whole table', () => {
+    const h = window.innerHeight;
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 300 });
+    try {
+      render(<SolitaireGame />);
+      const cw = parseFloat(screen.getByTestId('solitaire-table').style.getPropertyValue('--cw'));
+      // Top row plus a 3.5-card column budget fit in the 300 px screen (minus the stat strip reserve).
+      expect(Math.round(cw * 1.4) * 4.6).toBeLessThanOrEqual(300 - 100);
+    } finally {
+      Object.defineProperty(window, 'innerHeight', { configurable: true, value: h });
+    }
+  });
+
+  it('uses touch wording in the subtitle', () => {
     render(<SolitaireGame />);
-    expect(document.querySelector('.arc-board-touch [data-testid="solitaire-table"]')).toBeTruthy();
+    expect(screen.getByText(/tap a card, then where it should go/)).toBeTruthy();
   });
 
   it('a tap selects a card without moving it', () => {

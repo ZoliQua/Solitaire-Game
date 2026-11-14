@@ -198,6 +198,9 @@ describe('Solitaire rules dialog', () => {
     expect(img.textContent).toContain('♥');
     expect(img.textContent).toContain('fekete');
     expect(img.textContent).toContain('piros');
+    // Plain red / black ink in the diagram, matching the written groups (not the four-colour deck).
+    const inks = [...img.querySelectorAll('text')].filter((t) => /^(K|Q|J|10)[♠♥♣♦]$/.test(t.textContent ?? ''));
+    expect(inks.map((t) => `${t.textContent}:${t.getAttribute('fill')}`)).toEqual(['K♠:#1b1b1f', 'Q♥:#d62828', 'J♣:#1b1b1f', '10♦:#d62828']);
     expect(img.querySelector('[data-testid="diagram-tooth"]')).toBeNull();
     act(() => applyDental(true));
     expect(within(dialog()).getByRole('img', { name: /^Ábra/ }).querySelector('[data-testid="diagram-tooth"]')).toBeTruthy();

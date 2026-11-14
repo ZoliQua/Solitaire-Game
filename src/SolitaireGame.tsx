@@ -653,7 +653,7 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
         <header className="arc-game__head">
           <div>
             <h1 className="arc-game__title">{gameName('solitaire', lang)}</h1>
-            <p className="arc-game__sub">{t('subtitle')}</p>
+            <p className="arc-game__sub">{t(touch ? 'subtitleTouch' : 'subtitle')}</p>
           </div>
         </header>
       )}
@@ -670,7 +670,7 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
       />
 
       <div className={styles.layout}>
-        <div className={`arc-game__board arc-board-touch ${styles.boardWrap}`}>
+        <div className={`arc-game__board arc-board-tap ${styles.boardWrap}`}>
           <Table
             state={state}
             deck={deck}

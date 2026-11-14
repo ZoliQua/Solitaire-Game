@@ -19,8 +19,8 @@ import { deal, HISTORY_CAP, MODES, variantOfMode, type ModeId } from './logic/ga
 import { BASE_POINTS, PAR_SECONDS, SOLITAIRE_MAX_SCORE, solitaireScore, TIME_FLOOR, UNDO_FLOOR, UNDO_STEP } from './logic/scoring';
 import type { FreeCellState, KlondikeState, SpiderState } from './logic/types';
 
-/** Same tones as the kit's four-colour deck. */
-const INK: Record<CardFace['suit'], string> = { S: '#1b1b1f', H: '#d62828', D: '#1f6feb', C: '#1f9d45' };
+/** Plain two-colour ink, so the drawing matches its written "red" / "black" groups. */
+const INK: Record<CardFace['suit'], string> = { S: '#1b1b1f', H: '#d62828', D: '#d62828', C: '#1b1b1f' };
 const GLYPH: Record<CardFace['suit'], string> = { S: '♠', H: '♥', D: '♦', C: '♣' };
 const RUN: CardFace[] = [
   { rank: 'K', suit: 'S' },

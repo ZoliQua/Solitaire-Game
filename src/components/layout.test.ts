@@ -25,6 +25,8 @@ describe('table layout', () => {
     // Top row plus a column budget of 3.5 cards stays inside the screen.
     expect(landscape.ch * 4.6).toBeLessThanOrEqual(390 - 100);
     expect(rowWidth(landscape)).toBeLessThanOrEqual(804);
+    const short = tableMetrics('spider', 716, 300);
+    expect(short.ch * 4.6).toBeLessThanOrEqual(300 - 100);
     // A desktop window keeps the full size.
     expect(tableMetrics('klondike', 792, 800).cw).toBe(96);
   });

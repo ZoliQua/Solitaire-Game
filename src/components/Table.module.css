@@ -67,15 +67,17 @@
 
 .card {
   position: absolute;
-  touch-action: none;
 }
 
 .card :global(.arc-card) {
   pointer-events: none;
 }
 
+/* Only a grabbable card takes the finger for a drag; elsewhere on the table the page still scrolls
+   (the board itself is .arc-board-tap: no double-tap zoom, no 300 ms delay). */
 .grab {
   cursor: grab;
+  touch-action: none;
 }
 
 .dragging {

@@ -14,7 +14,8 @@
   position: relative;
   width: 100%;
   min-width: 0;
-  min-height: 320px;
+  /* Room for the overlays, but never taller than a short landscape screen. */
+  min-height: min(320px, 70vh);
 }
 
 .side {
