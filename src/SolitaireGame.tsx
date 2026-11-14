@@ -2,17 +2,23 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import {
   cardLabel,
   clearSession,
+  FinishButton,
   formatClock,
   formatNumber,
+  FullscreenButton,
   gameName,
   GameOverlay,
   KeyHelp,
   readString,
+  RulesButton,
   SaveBadge,
   shouldIgnoreKey,
   StatPanel,
+  TouchHelp,
   useArcadeRun,
   useDental,
+  useImmersive,
+  useIsTouch,
   useKitMessages,
   useLang,
   useMessages,
@@ -33,6 +39,7 @@ import {
   bestMove,
   DEFAULT_MODE,
   findHint,
+  finishGame,
   fromSaved,
   isModeId,
   isSavedGame,
@@ -53,6 +60,8 @@ import {
 import { History } from './logic/history';
 import { canAutoComplete, isLegalMove, isWon } from './logic/moves';
 import { solitaireScore } from './logic/scoring';
+import { modeLabel, RULES_KEY, TOUCH_ROWS, VARIANT_KEY } from './labels';
+import { useRulesSections } from './rules';
 import type { Loc, Move, Variant } from './logic/types';
 import styles from './SolitaireGame.module.css';
 
@@ -62,13 +71,13 @@ export const MODE_KEY = 'solitaire.mode';
 export const DECK_KEY = 'solitaire.deck';
 /** How long a hint stays highlighted. */
 export const HINT_MS = 3000;
+/** Two finger taps on the same card within this time are a double tap (send it home). */
+export const DOUBLE_TAP_MS = 400;
 
 type Phase = 'idle' | 'live' | 'paused';
 type Confirm = { kind: 'newGame' } | { kind: 'mode'; mode: ModeId } | null;
 type Picked = { from: Loc; count: number } | null;
 
-const VARIANT_KEY: Record<Variant, MessageKey> = { klondike: 'variantKlondike', spider: 'variantSpider', freecell: 'variantFreecell' };
-const RULES_KEY: Record<Variant, MessageKey> = { klondike: 'rulesKlondike', spider: 'rulesSpider', freecell: 'rulesFreecell' };
 const OPTIONS: Record<Variant, [ModeId, MessageKey][]> = {
   klondike: [
     ['klondike1', 'draw1'],
@@ -93,6 +102,7 @@ const KEYS: [string, MessageKey][] = [
   ['N', 'keyNew'],
   ['Esc', 'keyEsc'],
   ['P', 'keyPause'],
+  ['R', 'keyRules'],
 ];
 
 const readMode = (): ModeId => {
@@ -133,17 +143,26 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
   const [focused, setFocused] = useState<PileKey | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [deck, setDeckState] = useState<DeckStyle>(readDeck);
+  // The Finish confirm is open: the clock and the table stand still without leaving `running`.
+  const [finishOpen, setFinishOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const immersive = useImmersive(rootRef);
+  const rulesSections = useRulesSections();
+  const touch = useIsTouch();
+  const lastTap = useRef<{ key: string; at: number } | null>(null);
 
   const state = game.state;
   const variant = state.variant;
   const won = isWon(state);
+  const finished = game.finishedEarly === true;
+  const over = won || finished;
   // An open confirm card pauses the run: the clock stops and the status reports paused.
   const status: ArcadeStatus =
-    phase === 'idle' ? 'idle' : won ? 'gameOver' : phase === 'paused' || confirm !== null ? 'paused' : 'running';
-  const running = phase === 'live' && !won;
-  const interactive = running && confirm === null;
+    phase === 'idle' ? 'idle' : over ? 'gameOver' : phase === 'paused' || confirm !== null ? 'paused' : 'running';
+  const running = phase === 'live' && !over;
+  const interactive = running && confirm === null && !finishOpen;
 
-  const seconds = useRunTimer(running && confirm === null, runKey, runKey === 0 && resumable ? resumable.seconds : 0);
+  const seconds = useRunTimer(running && confirm === null && !finishOpen, runKey, runKey === 0 && resumable ? resumable.seconds : 0);
   const secondsRef = useRef(seconds);
   secondsRef.current = seconds;
 
@@ -154,7 +173,8 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
     score,
     seconds: final?.seconds ?? seconds,
     runKey,
-    outcome: 'win',
+    // Finish ranks the shown 0 on purpose; a won game is the only one that scores.
+    outcome: () => (finished ? 'finished' : 'win'),
     props,
   });
 
@@ -162,8 +182,8 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
   const savedAt = useSessionAutosave({
     gameId: 'solitaire',
     schema: SESSION_SCHEMA,
-    enabled: phase !== 'idle' && !won,
-    discard: phase === 'idle' || won,
+    enabled: phase !== 'idle' && !over,
+    discard: phase === 'idle' || over,
     data: saved,
     seconds,
     score: 0,
@@ -205,8 +225,73 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
 
   const play = useCallback((move: Move) => (interactive ? commit(playMove(game, move), game) : false), [interactive, game, commit]);
 
-  const tap = useCallback(
+  /** Moves the picked cards onto `to` (the longest part of the pick that fits). False: nothing fits. */
+  const dropPicked = useCallback(
+    (to: Loc): boolean => {
+      if (!picked) return false;
+      for (let n = picked.count; n >= 1; n--) {
+        const m: Move = { kind: 'move', from: picked.from, to, count: n };
+        if (isLegalMove(state, m)) return play(m);
+      }
+      return false;
+    },
+    [picked, state, play],
+  );
+
+  /**
+   * A finger tap on a grabbable card: select it (with the cards on it); with a selection, the tapped
+   * card's pile is the target; the same card again within DOUBLE_TAP_MS sends it home (or to the best place).
+   */
+  const touchTap = useCallback(
     (from: Loc, count: number) => {
+      if (!interactive) return;
+      const key = `${from.pile}:${from.index}:${count}`;
+      const now = Date.now();
+      const prev = lastTap.current;
+      lastTap.current = { key, at: now };
+      if (picked && sameLoc(picked.from, from) && picked.count === count) {
+        lastTap.current = null;
+        if (prev?.key === key && now - prev.at <= DOUBLE_TAP_MS) {
+          const m = bestMove(state, from, count);
+          if (m) play(m);
+          else {
+            const cards = pileCards(state, from);
+            const c = cards[cards.length - count];
+            setPicked(null);
+            setMessage(c ? t('statusNoMove', { card: cardLabel(c, lang) }) : null);
+          }
+        } else setPicked(null);
+        return;
+      }
+      if (picked && !sameLoc(picked.from, from) && dropPicked(from)) return;
+      setPicked({ from, count });
+      setHint(null);
+      setMessage(null);
+    },
+    [interactive, picked, state, play, dropPicked, t, lang],
+  );
+
+  /** A tap or click on a pile outside its grabbable cards: the target of the selection, if any. */
+  const pileTap = useCallback(
+    (to: Loc) => {
+      if (!interactive || !picked || sameLoc(picked.from, to)) return;
+      if (!dropPicked(to)) setMessage(t('statusCantDrop'));
+    },
+    [interactive, picked, dropPicked, t],
+  );
+
+  const clearPick = useCallback(() => {
+    setPicked(null);
+    setMessage(null);
+    lastTap.current = null;
+  }, []);
+
+  const tap = useCallback(
+    (from: Loc, count: number, pointerType: string) => {
+      if (pointerType === 'touch') {
+        touchTap(from, count);
+        return;
+      }
       if (!interactive || from.pile === 'foundation') return;
       const m = bestMove(state, from, count);
       if (m) play(m);
@@ -216,7 +301,7 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
         setMessage(c ? t('statusNoMove', { card: cardLabel(c, lang) }) : null);
       }
     },
-    [interactive, state, play, t, lang],
+    [interactive, state, play, t, lang, touchTap],
   );
 
   const { drag, start: startDrag } = useDrag({
@@ -237,9 +322,25 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
     if (interactive) commit(undoGame(game), game);
   }, [interactive, game, commit]);
 
-  const finish = useCallback(() => {
+  const autoFinish = useCallback(() => {
     if (interactive) commit(autoComplete(game), game);
   }, [interactive, game, commit]);
+
+  /** Finish button, confirmed: the game is over now and ranks 0 (only a won game scores). */
+  const finishEarly = useCallback(() => {
+    setGame((g) => finishGame(g));
+    setFinal({ score: 0, seconds: secondsRef.current });
+    setConfirm(null);
+    setWelcomeBack(false);
+    setHint(null);
+    setPicked(null);
+    setMessage(null);
+  }, []);
+
+  /** Opening the rules pauses a live game; closing them leaves it paused. */
+  const rulesOpen = useCallback((open: boolean) => {
+    if (open) setPhase((p) => (p === 'live' ? 'paused' : p));
+  }, []);
 
   const showHint = useCallback(() => {
     if (!interactive) return;
@@ -308,11 +409,11 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
   const playAgain = useCallback(() => startRun(true), [startRun]);
 
   const togglePause = useCallback(() => {
-    if (won || phase === 'idle') return;
+    if (over || phase === 'idle') return;
     setWelcomeBack(false);
     setConfirm(null);
     setPhase((p) => (p === 'live' ? 'paused' : 'live'));
-  }, [won, phase]);
+  }, [over, phase]);
 
   const inProgress = (status === 'running' || status === 'paused') && game.moves > 0;
 
@@ -379,8 +480,8 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
   }, [status, start, togglePause, playAgain]);
 
   // ── Keyboard ───────────────────────────────────────────────
-  const keys = useRef({ interactive, confirm, picked, hint, primary, togglePause, confirmDialog, dismissDialog, undo, showHint, finish, stock, requestNewGame, adjustPick });
-  keys.current = { interactive, confirm, picked, hint, primary, togglePause, confirmDialog, dismissDialog, undo, showHint, finish, stock, requestNewGame, adjustPick };
+  const keys = useRef({ interactive, confirm, picked, hint, primary, togglePause, confirmDialog, dismissDialog, undo, showHint, autoFinish, stock, requestNewGame, adjustPick });
+  keys.current = { interactive, confirm, picked, hint, primary, togglePause, confirmDialog, dismissDialog, undo, showHint, autoFinish, stock, requestNewGame, adjustPick };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const o = keys.current;
@@ -426,7 +527,7 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
       const actions: Record<string, () => void> = {
         h: o.showHint,
         u: o.undo,
-        a: o.finish,
+        a: o.autoFinish,
         d: o.stock,
         n: o.requestNewGame,
         arrowup: () => o.adjustPick(1),
@@ -444,15 +545,12 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
 
   // ── View ───────────────────────────────────────────────────
   const num = (n: number) => formatNumber(n, lang);
-  const modeName = (mode: ModeId): string => {
-    const v = variantOfMode(mode);
-    const opt = OPTIONS[v].find(([m]) => m === mode);
-    return opt ? `${t(VARIANT_KEY[v])} · ${t(opt[1])}` : t(VARIANT_KEY[v]);
-  };
+  const modeName = (mode: ModeId): string => modeLabel(mode, t);
   const canFinish = interactive && canAutoComplete(state);
   const best = Math.max(stats.best, won ? score : 0);
   const newBest = won && score > stats.bestBeforeRun;
   const keyRows = KEYS.map(([keys, action]): [string, string] => [keys, t(action)]);
+  const touchRows = TOUCH_ROWS.map(([gesture, action]): [string, string] => [t(gesture), t(action)]);
 
   const hintText = (h: Move): string => {
     if (h.kind === 'stock') return t('statusHintStock');
@@ -465,18 +563,19 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
 
   let statusLabel: string | undefined;
   if (running) {
-    if (picked) {
+    // A message (e.g. "do not fit") is newer than the pick it answers, so it shows first.
+    if (message) statusLabel = message;
+    else if (picked) {
       const cards = pileCards(state, picked.from);
       const c = cards[cards.length - picked.count];
       statusLabel = c
         ? picked.count > 1
-          ? t('statusPickedRun', { n: num(picked.count), card: cardLabel(c, lang) })
-          : t('statusPicked', { card: cardLabel(c, lang) })
+          ? t(touch ? 'statusPickedRunTouch' : 'statusPickedRun', { n: num(picked.count), card: cardLabel(c, lang) })
+          : t(touch ? 'statusPickedTouch' : 'statusPicked', { card: cardLabel(c, lang) })
         : undefined;
     } else if (hint) statusLabel = hintText(hint);
-    else if (message) statusLabel = message;
-    else if (canAutoComplete(state)) statusLabel = t('statusAuto');
-    else statusLabel = t('statusPlay');
+    else if (canAutoComplete(state)) statusLabel = t(touch ? 'statusAutoTouch' : 'statusAuto');
+    else statusLabel = t(touch ? 'statusPlayTouch' : 'statusPlay');
   }
 
   let overlay: { title: string; message: string; actions: OverlayAction[] } | null = null;
@@ -519,6 +618,17 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
           message: t('pausedBody'),
           actions: [{ label: k('resume'), onClick: togglePause, primary: true, kbd: 'P' }],
         };
+  } else if (status === 'gameOver' && finished) {
+    overlay = {
+      title: k('finishedEarly'),
+      message: t('finishedBody', {
+        mode: modeName(game.mode),
+        moves: num(game.moves),
+        time: formatClock(final?.seconds ?? seconds),
+        score: num(0),
+      }),
+      actions: [{ label: t('playAgain'), onClick: playAgain, primary: true, kbd: 'Enter' }],
+    };
   } else if (status === 'gameOver') {
     overlay = {
       title: dental ? t('wonTitleDental') : t('wonTitle'),
@@ -538,7 +648,7 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
   const options = OPTIONS[currentVariant];
 
   return (
-    <div className={`arc-game ${styles.game}`} style={{ '--game-color': 'var(--game-solitaire)' } as CSSProperties}>
+    <div ref={rootRef} className={`arc-game ${styles.game}`} style={{ '--game-color': 'var(--game-solitaire)' } as CSSProperties}>
       {!embedded && (
         <header className="arc-game__head">
           <div>
@@ -554,13 +664,13 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
         items={[
           { label: k('moves'), value: num(game.moves) },
           { label: k('time'), value: formatClock(final?.seconds ?? seconds) },
-          { label: k('score'), value: won ? num(score) : '—', highlight: newBest },
+          { label: k('score'), value: num(score), highlight: newBest },
           { label: k('best'), value: num(best) },
         ]}
       />
 
       <div className={styles.layout}>
-        <div className={`arc-game__board ${styles.boardWrap}`}>
+        <div className={`arc-game__board arc-board-touch ${styles.boardWrap}`}>
           <Table
             state={state}
             deck={deck}
@@ -574,6 +684,8 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
             onStock={stock}
             onPileActivate={activatePile}
             onPileFocus={setFocused}
+            onPileTap={pileTap}
+            onBackgroundTap={clearPick}
           />
           {overlay && <GameOverlay {...overlay} />}
         </div>
@@ -605,9 +717,14 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
               <button type="button" className="arc-btn" onClick={stock} disabled={!interactive || variant === 'freecell'}>
                 {variant === 'spider' ? t('stockSpider') : t('stockKlondike')} <kbd className="arc-kbd">D</kbd>
               </button>
-              <button type="button" className={`arc-btn${canFinish ? ' arc-btn--primary' : ''}`} onClick={finish} disabled={!canFinish}>
+              <button type="button" className={`arc-btn${canFinish ? ' arc-btn--primary' : ''}`} onClick={autoFinish} disabled={!canFinish}>
                 {t('autoComplete')} <kbd className="arc-kbd">A</kbd>
               </button>
+            </div>
+            <div className={styles.tools}>
+              <RulesButton sections={rulesSections} gameId="solitaire" onOpenChange={rulesOpen} />
+              <FinishButton score={score} visible={phase !== 'idle' && !over} onFinish={finishEarly} onOpenChange={setFinishOpen} />
+              <FullscreenButton immersive={immersive} />
             </div>
             <p className={styles.note}>{t('dealNote', { deal: num(seedOf(state)) })}</p>
             <div className={styles.save}>
@@ -662,6 +779,7 @@ export function SolitaireGame(props: ArcadeGameProps = {}) {
           <section className="arc-panel">
             <h2 className="arc-panel__title">{t('panelKeys')}</h2>
             <KeyHelp rows={keyRows} />
+            <TouchHelp rows={touchRows} />
           </section>
         </aside>
       </div>

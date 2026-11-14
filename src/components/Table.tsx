@@ -4,7 +4,7 @@ import { MESSAGES } from '../i18n';
 import { movableCount, sameLoc } from '../logic/game';
 import type { CardState, Loc, Move, Pile as Cards, SolitaireState } from '../logic/types';
 import { Pile, type PileAttr, type PileItem } from './Pile';
-import { columnLayout, pileKeyOf, tableMetrics, type PileKey } from './layout';
+import { columnLayout, NARROW, pileKeyOf, tableMetrics, type PileKey } from './layout';
 import type { DragInfo } from './useDrag';
 import styles from './Table.module.css';
 
@@ -26,6 +26,10 @@ export type TableProps = {
   /** Enter / Space on a pile (keyboard pick and drop). */
   onPileActivate?: (loc: Loc) => void;
   onPileFocus?: (key: PileKey) => void;
+  /** A tap / click on a pile outside its grabbable cards (an empty pile, a face-down card): a drop target. */
+  onPileTap?: (loc: Loc) => void;
+  /** A tap / click on the table between the piles. */
+  onBackgroundTap?: () => void;
 };
 
 function useWidth() {
@@ -58,7 +62,8 @@ export function Table(props: TableProps) {
   const t = useMessages(MESSAGES);
   const [lang] = useLang();
   const { ref, width, viewH } = useWidth();
-  const { cols, gap, cw, ch } = tableMetrics(state.variant, width);
+  const { cols, gap, cw, ch } = tableMetrics(state.variant, width, viewH);
+  const tight = width < NARROW;
   const num = (n: number) => formatNumber(n, lang);
   const spider = state.variant === 'spider';
   const budget = Math.max(ch * 3.5, viewH - 240 - ch);
@@ -102,6 +107,7 @@ export function Table(props: TableProps) {
       dragged,
       pickedFrom,
       onCardDown: (index: number, e: PointerEvent) => props.onCardDown?.(l, length - index, e),
+      onActivate: () => props.onPileTap?.(l),
       onKeyDown: (e: KeyboardEvent) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -274,7 +280,7 @@ export function Table(props: TableProps) {
   // ── Columns ────────────────────────────────────────────────
   const columns = state.tableau.map((p, i) => {
     const l = loc('tableau', i);
-    const { ys, height } = columnLayout(p, ch, budget, spider);
+    const { ys, height } = columnLayout(p, ch, budget, spider, tight);
     const movable = interactive ? movableCount(state, l) : 0;
     return (
       <Pile
@@ -305,6 +311,9 @@ export function Table(props: TableProps) {
       role="group"
       aria-label={t('tableLabel', { game: gameName('solitaire', lang) })}
       style={{ '--cw': `${cw}px`, '--gap': `${gap}px` } as CSSProperties}
+      onClick={(e) => {
+        if (!(e.target instanceof Element) || !e.target.closest('[data-pile]')) props.onBackgroundTap?.();
+      }}
     >
       <div className={styles.row} style={gridStyle}>
         {top}

@@ -64,6 +64,8 @@ export type Game = {
   /** Player actions (stock turns included; undo does not count). */
   moves: number;
   undos: number;
+  /** Ended with the Finish button: over, scores 0, takes no more moves. Never saved. */
+  finishedEarly?: boolean;
 };
 
 export function fromState(state: SolitaireState): Game {
@@ -83,14 +85,21 @@ function settle(state: SolitaireState, move: Move): SolitaireState {
   return autoFoundation(state).reduce<SolitaireState>((s, m) => applyMove(s, m), state);
 }
 
+/** Won, or ended early with the Finish button. */
+export const isOver = (game: Game): boolean => game.finishedEarly === true || isWon(game.state);
+
+/** Ends the game early (Finish button): it is over and scores nothing. */
+export const finishGame = (game: Game): Game => (isOver(game) ? game : { ...game, finishedEarly: true });
+
 /** The player's move plus the safe auto-moves it allows, as one undo step. Illegal → the same game. */
 export function playMove(game: Game, move: Move): Game {
-  if (isWon(game.state) || !isLegalMove(game.state, move)) return game;
+  if (isOver(game) || !isLegalMove(game.state, move)) return game;
   const next = settle(applyMove(game.state, move), move);
   return { ...game, state: next, history: History.push(game.history, game.state), moves: game.moves + 1 };
 }
 
 export function undoGame(game: Game): Game {
+  if (game.finishedEarly) return game;
   const step = History.undo(game.history);
   if (!step) return game;
   return { ...game, state: step.state, history: step.history, undos: game.undos + 1 };
@@ -98,7 +107,7 @@ export function undoGame(game: Game): Game {
 
 /** Plays every remaining card home once `canAutoComplete` holds (one undo step). Otherwise a no-op. */
 export function autoComplete(game: Game): Game {
-  if (isWon(game.state) || !canAutoComplete(game.state)) return game;
+  if (isOver(game) || !canAutoComplete(game.state)) return game;
   let s = game.state;
   for (let guard = 0; guard < 200 && !isWon(s); guard++) {
     const m = legalMoves(s).find((x) => x.kind === 'move' && x.to.pile === 'foundation' && x.from.pile !== 'foundation');

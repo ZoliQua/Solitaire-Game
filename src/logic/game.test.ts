@@ -5,8 +5,10 @@ import {
   autoComplete,
   bestMove,
   findHint,
+  finishGame,
   fromState,
   HISTORY_CAP,
+  isOver,
   isSavedGame,
   MODES,
   modeOf,
@@ -162,5 +164,19 @@ describe('saves', () => {
     expect(isSavedGame(null)).toBe(false);
     const k = toSaved(fromState(klondikePosition({ tableau: [suitUpTo('S', '3')] })));
     expect(isSavedGame(JSON.parse(JSON.stringify(k)))).toBe(true);
+  });
+});
+
+describe('finishGame', () => {
+  it('ends the game early: over, no more moves or undo, not saved', () => {
+    const g = fromState(klondikePosition({ tableau: ['8S', '7H'] }));
+    const played = playMove(g, { kind: 'move', from: { pile: 'tableau', index: 1 }, to: { pile: 'tableau', index: 0 }, count: 1 });
+    const done = finishGame(played);
+    expect(isOver(played)).toBe(false);
+    expect(isOver(done)).toBe(true);
+    expect(undoGame(done)).toBe(done);
+    expect(playMove(done, { kind: 'stock' })).toBe(done);
+    expect(finishGame(done)).toBe(done);
+    expect('finishedEarly' in toSaved(done)).toBe(false);
   });
 });

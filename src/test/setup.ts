@@ -18,9 +18,11 @@ for (const win of [dom?.window, globalThis as unknown as Window & typeof globalT
   if (typeof win.PointerEvent === 'undefined') {
     class PointerEventPolyfill extends win.MouseEvent {
       readonly pointerId: number;
+      readonly pointerType: string;
       constructor(type: string, init: PointerEventInit = {}) {
         super(type, init);
         this.pointerId = init.pointerId ?? 1;
+        this.pointerType = init.pointerType ?? 'mouse';
       }
     }
     Object.defineProperty(win, 'PointerEvent', { configurable: true, writable: true, value: PointerEventPolyfill });

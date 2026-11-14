@@ -84,6 +84,8 @@ export function Pile(p: PileProps) {
             style={cardStyle}
             data-card-index={it.index}
             onPointerDown={it.draggable && p.interactive && p.onCardDown ? (e) => p.onCardDown!(it.index, e) : undefined}
+            // A grabbable card answers its own press (useDrag): its click must not also reach the pile.
+            onClick={it.draggable && p.interactive && p.onCardDown ? (e) => e.stopPropagation() : undefined}
           >
             <PlayingCard
               card={it.card}

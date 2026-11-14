@@ -133,7 +133,7 @@ describe('<SolitaireGame />', () => {
     const onGameOver = vi.fn();
     const onRunEnd = vi.fn();
     resume(nearlyWonKlondike(), { onGameOver, onRunEnd });
-    expect(screen.getByRole('status').textContent).toMatch(/press A to finish/);
+    expect(screen.getByRole('status').textContent).toMatch(/press A to auto-complete/);
     key('a');
     expect(screen.getByRole('dialog', { name: 'You won!' })).toBeTruthy();
     // 10 s on a 300 s par, no undo: the full 1000 for Klondike draw 1.

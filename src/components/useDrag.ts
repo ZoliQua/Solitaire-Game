@@ -10,8 +10,8 @@ export type DragOptions = {
   enabled: boolean;
   /** Released over `to` (null: not over a pile). Return nothing: an illegal drop just snaps back. */
   onDrop(from: Loc, count: number, to: Loc | null): void;
-  /** Pressed and released without moving: click-to-move. */
-  onTap(from: Loc, count: number): void;
+  /** Pressed and released without moving: a click (mouse, pen) or a tap (`pointerType` 'touch'). */
+  onTap(from: Loc, count: number, pointerType: string): void;
 };
 
 const PILES = ['tableau', 'foundation', 'cell', 'waste'] as const;
@@ -26,7 +26,7 @@ export function locAt(x: number, y: number): Loc | null {
   return (PILES as readonly string[]).includes(pile) && Number.isInteger(index) ? { pile, index } : null;
 }
 
-type Press = { from: Loc; count: number; x: number; y: number; id: number; moved: boolean };
+type Press = { from: Loc; count: number; x: number; y: number; id: number; type: string; moved: boolean };
 
 /**
  * Pointer-events drag of a card or a run (mouse, pen and touch alike). The dragged cards follow the
@@ -56,7 +56,7 @@ export function useDrag(opts: DragOptions) {
     (from: Loc, count: number, e: ReactPointerEvent) => {
       if (!ref.current.enabled || press.current || (e.button ?? 0) !== 0) return;
       e.preventDefault();
-      const p: Press = { from, count, x: e.clientX, y: e.clientY, id: e.pointerId, moved: false };
+      const p: Press = { from, count, x: e.clientX, y: e.clientY, id: e.pointerId, type: e.pointerType || 'mouse', moved: false };
       press.current = p;
       const same = (ev: PointerEvent) => ev.pointerId === undefined || p.id === undefined || ev.pointerId === p.id;
       const move = (ev: PointerEvent) => {
@@ -72,7 +72,7 @@ export function useDrag(opts: DragOptions) {
         const moved = p.moved;
         end();
         if (moved) ref.current.onDrop(from, count, locAt(ev.clientX, ev.clientY));
-        else ref.current.onTap(from, count);
+        else ref.current.onTap(from, count, p.type);
       };
       const cancel = () => end();
       window.addEventListener('pointermove', move);
