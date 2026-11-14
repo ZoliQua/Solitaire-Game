@@ -205,6 +205,13 @@ body {
   border-color: rgba(0, 0, 0, 0.18);
   color: inherit;
 }
+/* No key hints on a touch device: there is no keyboard to press them on. */
+@media (pointer: coarse) {
+  .arc-btn .arc-kbd,
+  .arc-btn kbd {
+    display: none;
+  }
+}
 
 /* ─── Panels ────────────────────────────────────────────────── */
 .arc-panel {
@@ -908,6 +915,16 @@ html[data-arcade-immersive] .arc-footer {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+}
+/* Touch: header controls get a full 44 px target (desktop keeps the compact 34 px). */
+@media (pointer: coarse) {
+  .arc-icon-btn,
+  .arc-lang__btn,
+  .arc-dental-toggle,
+  .arc-topbar .arc-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 .arc-lang__btn:hover,
 .arc-dental-toggle:hover {

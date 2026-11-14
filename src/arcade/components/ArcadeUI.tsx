@@ -59,7 +59,7 @@ export type OverlayAction = {
   label: string;
   onClick: () => void;
   primary?: boolean;
-  /** Keyboard hint rendered next to the label, e.g. "P". */
+  /** Keyboard hint rendered next to the label, e.g. "P" (not on a touch device). */
   kbd?: string;
 };
 
@@ -75,6 +75,7 @@ export function GameOverlay({
   actions?: OverlayAction[];
   children?: ReactNode;
 }) {
+  const touch = useIsTouch();
   return (
     <div className="arc-overlay" role="dialog" aria-live="polite" aria-label={typeof title === 'string' ? title : undefined}>
       <div className="arc-overlay__card">
@@ -91,7 +92,7 @@ export function GameOverlay({
                 onClick={a.onClick}
               >
                 {a.label}
-                {a.kbd && <kbd className="arc-kbd">{a.kbd}</kbd>}
+                {a.kbd && !touch && <kbd className="arc-kbd">{a.kbd}</kbd>}
               </button>
             ))}
           </div>
